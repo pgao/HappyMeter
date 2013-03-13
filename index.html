@@ -3,20 +3,33 @@
 	<head>
 		<script language="javascript" type="text/javascript" src="/static/flot/jquery.js"></script>
 		<script language="javascript" type="text/javascript" src="/static/flot/jquery.flot.js"></script>
-		
-		
+		<link href="style.css" rel="stylesheet" type="text/css">
 	</head>
 	
 	<body>
-		<div id="plot" style="width:600px;height:300px;"></div>
+		<div id="title">HAPPYMETER</div>
+
+		<br>
+		<br>
+
+		<div id="happyface">:|</div>
+
+		<br>
+		<br>
+
+		<div id="plot"></div>
+		<div id="tweets"></div>
 
 		<script type="text/javascript">
 			$(function() {
 				var data = [];
 				var updateInterval = 1000;
 				var width = 100;
+				var tweetslength = 0;
 
 				var blah = 0;
+
+				var first = true;
 
 				var options = {
 					series: { shadowSize: 0 }, // drawing is faster without shadows
@@ -39,18 +52,11 @@
 					$.getJSON(url, function(json) {
 						stocks = json[0];
 						total = 0;
-						//console.log(stocks);
 						for (var i = 0; i < stocks.length; i++) {
-							//console.log(stocks[i]);
 							total += parseInt(stocks[i]);
 						}
-						//console.log("bleh");
-						//console.log(total);
 
-						//data.push(total)
-						blah += 1000;
 						while (data.length < width) {
-						//	data.push(blah);
 							data.push(total);
 						}
 
@@ -58,26 +64,34 @@
 						for (var i = 0; i < data.length; ++i)
             				res.push([i, data[i]]);
 
-            			console.log(res);
-						//console.log(data);
+            			if (first == true) {
+            				first = false;
+            				options["yaxis"]["max"] = total * 1.5;
+            			}
 
 						$.plot("#plot", [res], options);
+
+						//tweets
+						tweetslength++;
+						if(tweetslength > 50) {
+							$('#tweets').text("");
+							tweetslength = 0;
+						}
+						var 
+						'<div class="arrow-up"></div>'
+						'<div class="arrow-down"></div>'
+						if (tweets == "positive") {
+
+						}
+						else if (tweets == "negative") {
+
+						}
+						else {
+
+						}
+						$('#tweets').prepend(json[1][0] + "<br><br>");
+
 					});
-
-					/*while (data.length < 300) {
-			            var prev = data.length > 0 ? data[data.length - 1] : 50;
-			            var y = prev + Math.random() * 1000 - 500;
-			            if (y < 0)
-			                y = 0;
-			            if (y > 35000)
-			                y = 35000;
-			            data.push(y);
-			        }
-			        console.log(data);*/
-
-					//console.log(res);
-
-					//return res;
 
 				}
 				
@@ -89,20 +103,6 @@
 
 				update();
 
-				/*
-				var d1 = [];
-				for (var i = 0; i < 14; i += 0.5) {
-					d1.push([i, Math.sin(i)]);
-				}
-
-				var d2 = [[0, 3], [4, 8], [8, 5], [9, 13]];
-
-				// A null signifies separate line segments
-
-				var d3 = [[0, 12], [7, 12], null, [7, 2.5], [12, 2.5]];
-
-				$.plot($("#plot"), [ d1, d2, d3 ]);
-				*/
 			});
 
 		</script>

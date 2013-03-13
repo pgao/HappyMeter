@@ -5,13 +5,15 @@ import simplejson
 import classify
 import get_tweet
 import os
-
+import random
 import sys
 sys.path.insert(0, 'flot/')
 
 PATH = sys.path
 
 classifier = classify.NaiveBayes()
+
+tweetbuffer = []
 
 class MainHandler(tornado.web.RequestHandler):
     def get(self):
@@ -32,18 +34,23 @@ class StyleHandler(tornado.web.RequestHandler):
 class DataHandler(tornado.web.RequestHandler):
     def get(self):
         quotes = self.get_stock_quotes()
-        sentiments = self.get_tweet_sentiments()
+        global tweetbuffer
+        if not tweetbuffer:
+            sentiments = self.get_tweet_sentiments()
+            tweetbuffer = sentiments
+        tweet = tweetbuffer[0]
+        tweetbuffer = tweetbuffer[1:]
         self.set_header("Content-Type", "application/json")
-        return self.write(simplejson.dumps([quotes, sentiments]))
+        return self.write(simplejson.dumps([quotes, tweet]))
     def get_stock_quotes(self):
         f = urllib2.urlopen("http://download.finance.yahoo.com/d/quotes.csv?s=^IXIC+^GDAXI+^HSI&f=l1 ")
         quotes = f.read().split("\r\n")
         return quotes[:-1]
     def get_tweet_sentiments(self):
         tweets = get_tweet.get_tweets()
-        sentiments = {}
+        sentiments = []
         for tweet in tweets:
-            sentiments[tweet] = classifier.classify(tweet)
+            sentiments.append((tweet, classifier.classify(tweet)))
         return sentiments
 
 application = tornado.web.Application([

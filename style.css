@@ -1,0 +1,42 @@
+#title {
+	text-align: center;
+	font-size: 50px;
+}
+
+#happyface {
+	text-align: center;
+
+	font-size: 100px;
+
+	width: 200px;
+	height: 150px;
+
+	margin-left: auto;
+	margin-right: auto;
+
+	-webkit-transform: rotate(-270deg); 
+	-moz-transform: rotate(-270deg);	
+}
+
+#plot {
+	width:450px;
+	height:300px;
+
+	float: left;
+
+	margin-left: 3em;
+}
+
+#tweets {
+	width:450px;
+	height:300px;
+
+	border-style: solid;
+	border-width: 1px;
+
+	float: right;
+
+	margin-right: 3em;
+
+	overflow: auto;
+}
