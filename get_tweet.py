@@ -8,13 +8,15 @@ api = twitter.Api(consumer_key="ElptdK9AGjxOBuORbiuTQ", consumer_secret="iufJBk1
 
 #to use this, type "sudo pip install twitter" first
 
-def get_tweets():
-    statuses = api.GetSearch("a")
-    text = []
-    for s in statuses:
-        text.append(s.GetText())
-        print s.GetText()
-    return text
+def get_tweets(keyword="e"):
+	if keyword == " ":
+		keyword = "e"
+	statuses = api.GetSearch(keyword)
+	text = []
+	for s in statuses:
+		text.append(s.GetText())
+		print s.GetText()
+	return text
 
 if __name__ == "__main__":
     get_tweets()

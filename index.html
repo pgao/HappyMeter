@@ -4,57 +4,50 @@
 		<script language="javascript" type="text/javascript" src="/static/flot/jquery.js"></script>
 		<script language="javascript" type="text/javascript" src="/static/flot/jquery.flot.js"></script>
 		<link href="style.css" rel="stylesheet" type="text/css">
+		<link href='http://fonts.googleapis.com/css?family=EB+Garamond' rel='stylesheet' type='text/css'>
+		<link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
 	</head>
 	
 	<body>
-		<div id="title">HAPPYMETER</div>
-
-		<br>
-		<br>
-
-		<div id="happyface">:|</div>
-
-		<br>
-		<br>
-
-		<div id="plot"></div>
-		<div id="tweets"></div>
 
 		<script type="text/javascript">
+			var data = [];
+			var updateInterval = 1000;
+			var width = 100;
+			var tweetslength = 0;
+
+			var score = 5000;
+
+			var first = true;
+
+			var options = {
+				series: { shadowSize: 0 }, // drawing is faster without shadows
+		        yaxis: { min: 0, max: 35000, labelWidth: 50},
+		        xaxis: { show: false }
+			}
+
+			var url = "getData";
+
 			$(function() {
-				var data = [];
-				var updateInterval = 1000;
-				var width = 100;
-				var tweetslength = 0;
-
-				var blah = 0;
-
-				var first = true;
-
-				var options = {
-					series: { shadowSize: 0 }, // drawing is faster without shadows
-			        yaxis: { min: 0, max: 35000 },
-			        xaxis: { show: false }
-				}
 
 				//var plot = $.plot($("#plot"), [ 50 ], options);
 				$.plot("#plot", data, options);
 
 				while (data.length < width)
-					data.push(50);
+					data.push(0);
 
-				function plotData() {
+				function getData() {
 					if (data.length > 0)
 						data = data.slice(1);
 
-					var url = "getData";
-
 					$.getJSON(url, function(json) {
-						stocks = json[0];
-						total = 0;
-						for (var i = 0; i < stocks.length; i++) {
-							total += parseInt(stocks[i]);
-						}
+						//var stocks = json[0][0];
+						var name = json[0][1];
+						var tweet = json[1][0];
+						var sentiment = json[1][1];
+						var total = parseInt(json[0][0]);
+
+						$('#plotTitle').text("Plot of stock price for: " + name);
 
 						while (data.length < width) {
 							data.push(total);
@@ -64,10 +57,20 @@
 						for (var i = 0; i < data.length; ++i)
             				res.push([i, data[i]]);
 
-            			if (first == true) {
+            			if (first == true || total > options["yaxis"]["max"] || total < options["yaxis"]["min"]) {
             				first = false;
-            				options["yaxis"]["max"] = total * 1.5;
+            				options["yaxis"]["min"] = total * 0.99;
+            				options["yaxis"]["max"] = total * 1.01;
             			}
+
+            			var previous = total;
+
+            			if (data[data.length - 2] != 50) {
+            				var previous = data[data.length - 2];
+            			}
+
+						var difference = ((total - previous) / previous) * 5000;
+						score += difference;
 
 						$.plot("#plot", [res], options);
 
@@ -77,34 +80,102 @@
 							$('#tweets').text("");
 							tweetslength = 0;
 						}
-						//'<div class="arrow-up"></div>'
-						//'<div class="arrow-down"></div>'
-						if (tweets == "positive") {
 
+						var tweetScore = 1000;
+
+						if (sentiment == "positive") {
+							$('#tweets').prepend('<div class="green-triangle"></div>  ' + json[1][0] + "<br><br>");
+							if (difference >= 0) {
+								$('#mouth').text(")");
+							}
+							else {
+								$('#mouth').text(":|");
+							}
+							//score += tweetScore;
 						}
-						else if (tweets == "negative") {
-
+						else if (sentiment == "negative") {
+							$('#tweets').prepend('<div class="red-triangle"></div>  ' + json[1][0] + "<br><br>");
+							if (difference <= 0) {
+								$('#mouth').text("(");
+							}
+							else {
+								$('#mouth').text("|");
+							}
+							//score -= tweetScore;
 						}
 						else {
-
+							$('#tweets').prepend('<div class="black-box"></div> ' + json[1][0] + "<br><br>");
+							$('#mouth').text("|");
 						}
-						$('#tweets').prepend(json[1][0] + "<br><br>");
+
+						/*console.log(score);
+						if (score < 4000) {
+							$('#happyface').text(":(");
+						}
+						else if (score > 6000) {
+							$('#happyface').text(":)");
+						}
+						else if (score >= 4000 && score <= 6000) {
+							$('#happyface').text(":|");
+						}*/
 
 					});
 
 				}
 				
 				function update() {
-					plotData();
+					getData();
 
 					setTimeout(update, updateInterval);
 				}
 
+
 				update();
 
 			});
+			
+			function changeTicker() {
+				data = [];
+				while (data.length < width)
+					data.push(0);
+				$.plot("#plot", data, options);
+				$('#tweets').text('');
+				var newTick = $("#tickerInput").val();
+				url = "getData?name=" + newTick;
+			}
 
 		</script>
+
+		<div id="title">Happy Meter</div>
+
+		<br>
+		<br>
+
+		<div id="happyface">
+			<div id="eyes">:</div>
+			<div id="mouth">|</div>
+		</div>
+
+		<br>
+		<br>
+
+		<div id="plotTitle"></div>
+		<br>
+		<div id="plotContainer">
+			<div id="plot"></div>
+		</div>
+		<div id="tweets"></div>
+
+		<br>
+		<br>
+		
+		<div id="searchContainer">
+			<div id="inputDescription">Track a different stock quote: </div>
+			<input type="text" id="tickerInput" value="^IXIC"></input>
+			<div id="submit" onclick="changeTicker();" id="submitButton">Submit</div>
+		</div>
+
+		
 	</body>
 	
 </html>
