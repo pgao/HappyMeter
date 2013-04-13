@@ -1,1 +1,1 @@
-web: python server.py
+web: ./bin/gunicorn -k tornado --workers=4 --bind=0.0.0.0:$PORT server

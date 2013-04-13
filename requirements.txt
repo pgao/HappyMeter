@@ -2,3 +2,4 @@ Tornado==2.4.1
 simplejson==2.6.1
 tweetstream==1.1.1
 oauth2==1.5.211
+gunicorn==0.13.2
