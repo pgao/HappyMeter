@@ -15,7 +15,7 @@ def get_tweets(keyword="e"):
 	text = []
 	for s in statuses:
 		text.append(s.GetText())
-		print s.GetText()
+		#print s.GetText()
 	return text
 
 if __name__ == "__main__":
