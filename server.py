@@ -84,5 +84,8 @@ application = tornado.web.Application([
 ], debug=True, static_path=os.path.join(os.path.dirname(__file__) , 'static'))
 
 if __name__ == "__main__":
+    tornado.options.parse_command_line()
+    http_server = tornado.httpserver.HTTPServer(Application())
     application.listen(tornado.options.options.port)
+    
     tornado.ioloop.IOLoop.instance().start()
