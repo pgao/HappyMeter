@@ -1,5 +1,8 @@
 import tornado.ioloop
 import tornado.web
+import tornado.options
+import tornado.httpserver
+
 import urllib2
 import simplejson
 import classify
@@ -84,8 +87,7 @@ application = tornado.web.Application([
 ], debug=True, static_path=os.path.join(os.path.dirname(__file__) , 'static'))
 
 if __name__ == "__main__":
-    tornado.options.parse_command_line()
-    http_server = tornado.httpserver.HTTPServer(Application())
-    application.listen(tornado.options.options.port)
-    
+    port = int(os.environ.get("PORT", 5000))
+    application.listen(8000)
+
     tornado.ioloop.IOLoop.instance().start()
