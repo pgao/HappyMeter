@@ -87,7 +87,6 @@ application = tornado.web.Application([
 ], debug=True, static_path=os.path.join(os.path.dirname(__file__) , 'static'))
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 5000))
-    application.listen(port)
+    application.listen(18888)
 
     tornado.ioloop.IOLoop.instance().start()
