@@ -44,7 +44,7 @@ body {
 #mouth {
 	margin-left: 10px;
 	/*width: 5px;*/
-	height: 140px;\
+	height: 140px;
 	-webkit-transform: rotate(-270deg);
 	-moz-transform: rotate(-270deg);
 }
