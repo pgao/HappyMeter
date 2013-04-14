@@ -34,7 +34,17 @@
 
 			var url = "getData";
 
-			$(function() {
+			$(function() {				
+
+				$("#tickerInput").bind("keypress", {}, keypressInBox);
+
+				function keypressInBox(e) {
+				    var code = (e.keyCode ? e.keyCode : e.which);
+				    if (code == 13) { //Enter keycode                        
+				        e.preventDefault();
+				        changeTicker();
+				    }
+				};
 
 				//var plot = $.plot($("#plot"), [ 50 ], options);
 				$.plot("#plot", data, options);
@@ -161,7 +171,6 @@
 
 					setTimeout(update, updateInterval);
 				}
-
 
 				update();
 
