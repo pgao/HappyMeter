@@ -10,9 +10,8 @@ body {
 	font-family: Helvetica;
 }
 
-#instructions {
-	margin-left: 31em;
-
+#instructionContainer {
+	text-align: center;
 }
 
 #happyface {
