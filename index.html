@@ -39,6 +39,109 @@
 
 			var url = "getData";
 
+			function changeTicker() {
+				data = [];
+				while (data.length < width)
+					data.push(0);
+				happyTotal = 1;
+				sadTotal = 1;
+				neutralTotal = 1;
+				$.plot("#plot", data, options);
+				$('#tweets').text('');
+				var newTick = $("#tickerInput").val();
+				url = "getData?name=" + newTick;
+			}
+
+			function getData() {
+				if (data.length > 0)
+					data = data.slice(1);
+
+				$.getJSON(url, function(json) {
+					//stock plot
+					var name = json[0][1];
+					var tweet = json[1][0];
+					var sentiment = json[1][1];
+					var total = parseInt(json[0][0]);
+
+					$('#plotTitle').text("Plot of stock price for: " + name);
+
+					while (data.length < width) {
+						data.push(total);
+					}
+
+					var res = [];
+					for (var i = 0; i < data.length; ++i)
+        				res.push([i, data[i]]);
+
+        			if (first == true || total > options["yaxis"]["max"] || total < options["yaxis"]["min"]) {
+        				first = false;
+        				options["yaxis"]["min"] = total * 0.99;
+        				options["yaxis"]["max"] = total * 1.01;
+        			}
+
+        			var previous = total;
+
+        			if (data[data.length - 2] != 50) {
+        				var previous = data[data.length - 2];
+        			}
+
+
+					$.plot("#plot", [res], options);
+
+					//reset tweetbox
+					tweetslength++;
+					if(tweetslength > 100) {
+						$('#tweets').text("");
+						tweetslength = 0;
+					}
+
+					//change happy face
+					var tweetScore = 1000;
+
+					if (sentiment == "positive") {
+						$('#tweets').prepend('<div class="green-triangle"></div>  ' + json[1][0] + "<br><br>");
+						happyTotal += 1;
+					}
+					else if (sentiment == "negative") {
+						$('#tweets').prepend('<div class="red-triangle"></div>  ' + json[1][0] + "<br><br>");
+						sadTotal += 1;
+					}
+					else {
+						neutralTotal = 1;
+					}
+
+					if (happyTotal/(happyTotal + sadTotal + neutralTotal) > 0.4) {
+						$('#mouth').text(")");
+					}
+					else if (sadTotal/(happyTotal + sadTotal + neutralTotal) > 0.4) {
+						$('#mouth').text("(");
+					}
+					else {
+						$('#tweets').prepend('<div class="black-box"></div> ' + json[1][0] + "<br><br>");
+						$('#mouth').text("|");
+					}
+
+				});
+
+			}
+			
+			function update() {
+				getData();
+
+				timeout = setTimeout(update, updateInterval);
+			}
+
+			function pauseControl() {
+				if (paused) {
+					paused = false;
+					update();
+				}
+				else {
+					paused = true;
+					clearTimeout(timeout);
+				}
+			}
+
 			$(function() {				
 
 				$("#tickerInput").bind("keypress", {}, keypressInBox);
@@ -57,153 +160,11 @@
 				while (data.length < width)
 					data.push(0);
 
-				function getData() {
-					if (data.length > 0)
-						data = data.slice(1);
-
-					$.getJSON(url, function(json) {
-						//stock plot
-						var name = json[0][1];
-						var tweet = json[1][0];
-						var sentiment = json[1][1];
-						var total = parseInt(json[0][0]);
-
-						$('#plotTitle').text("Plot of stock price for: " + name);
-
-						while (data.length < width) {
-							data.push(total);
-						}
-
-						var res = [];
-						for (var i = 0; i < data.length; ++i)
-            				res.push([i, data[i]]);
-
-            			if (first == true || total > options["yaxis"]["max"] || total < options["yaxis"]["min"]) {
-            				first = false;
-            				options["yaxis"]["min"] = total * 0.99;
-            				options["yaxis"]["max"] = total * 1.01;
-            			}
-
-            			var previous = total;
-
-            			if (data[data.length - 2] != 50) {
-            				var previous = data[data.length - 2];
-            			}
-
-
-						$.plot("#plot", [res], options);
-
-						//reset tweetbox
-						tweetslength++;
-						if(tweetslength > 100) {
-							$('#tweets').text("");
-							tweetslength = 0;
-						}
-
-						//change happy face
-						var tweetScore = 1000;
-
-						if (sentiment == "positive") {
-							$('#tweets').prepend('<div class="green-triangle"></div>  ' + json[1][0] + "<br><br>");
-							happyTotal += 1;
-						}
-						else if (sentiment == "negative") {
-							$('#tweets').prepend('<div class="red-triangle"></div>  ' + json[1][0] + "<br><br>");
-							sadTotal += 1;
-						}
-						else {
-							neutralTotal = 1;
-						}
-
-						if (happyTotal/(happyTotal + sadTotal + neutralTotal) > 0.4) {
-							$('#mouth').text(")");
-						}
-						else if (sadTotal/(happyTotal + sadTotal + neutralTotal) > 0.4) {
-							$('#mouth').text("(");
-						}
-						else {
-							$('#tweets').prepend('<div class="black-box"></div> ' + json[1][0] + "<br><br>");
-							$('#mouth').text("|");
-						}
-
-						/*
-						var difference = ((total - previous) / previous) * 5000;
-						score += difference;
-
-						if (sentiment == "positive") {
-							$('#tweets').prepend('<div class="green-triangle"></div>  ' + json[1][0] + "<br><br>");
-							if (difference >= 0) {
-								$('#mouth').text(")");
-							}
-							else {
-								$('#mouth').text(":|");
-							}
-							//score += tweetScore;
-						}
-						else if (sentiment == "negative") {
-							$('#tweets').prepend('<div class="red-triangle"></div>  ' + json[1][0] + "<br><br>");
-							if (difference <= 0) {
-								$('#mouth').text("(");
-							}
-							else {
-								$('#mouth').text("|");
-							}
-							//score -= tweetScore;
-						}
-						else {
-							$('#tweets').prepend('<div class="black-box"></div> ' + json[1][0] + "<br><br>");
-							$('#mouth').text("|");
-						}
-						*/
-
-						/*console.log(score);
-						if (score < 4000) {
-							$('#happyface').text(":(");
-						}
-						else if (score > 6000) {
-							$('#happyface').text(":)");
-						}
-						else if (score >= 4000 && score <= 6000) {
-							$('#happyface').text(":|");
-						}*/
-
-					});
-
-				}
-				
-				function update() {
-					getData();
-
-					timeout = setTimeout(update, updateInterval);
-				}
-
 				update();
 
 			});
 			
-			function changeTicker() {
-				data = [];
-				while (data.length < width)
-					data.push(0);
-				happyTotal = 1;
-				sadTotal = 1;
-				neutralTotal = 1;
-				$.plot("#plot", data, options);
-				$('#tweets').text('');
-				var newTick = $("#tickerInput").val();
-				url = "getData?name=" + newTick;
-			}
 			
-			function pauseControl() {
-				if (paused) {
-					paused = false;
-					update();
-				}
-				else {
-					paused = true;
-					clearTimeout(timeout);
-				}
-			}
 		</script>
 
 		<div id="title">Happy Meter</div>
