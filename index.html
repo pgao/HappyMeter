@@ -97,13 +97,14 @@
 
 					//change happy face
 					var tweetScore = 1000;
-
+					//tweetText = '<p class="tweetText">' + json[1][0] + "</p><br><br>";
+					tweetText = json[1][0] + "<br><br>";
 					if (sentiment == "positive") {
-						$('#tweets').prepend('<div class="green-triangle"></div>  ' + json[1][0] + "<br><br>");
+						$('#tweets').prepend('<div class="green-triangle"></div>' + tweetText);
 						happyTotal += 1;
 					}
 					else if (sentiment == "negative") {
-						$('#tweets').prepend('<div class="red-triangle"></div>  ' + json[1][0] + "<br><br>");
+						$('#tweets').prepend('<div class="red-triangle"></div>' + tweetText);
 						sadTotal += 1;
 					}
 					else {
@@ -117,7 +118,7 @@
 						$('#mouth').text("(");
 					}
 					else {
-						$('#tweets').prepend('<div class="black-box"></div> ' + json[1][0] + "<br><br>");
+						$('#tweets').prepend('<div class="black-box"></div>' + tweetText);
 						$('#mouth').text("|");
 					}
 
