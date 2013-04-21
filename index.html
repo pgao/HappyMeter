@@ -98,13 +98,13 @@
 					//change happy face
 					var tweetScore = 1000;
 					//tweetText = '<p class="tweetText">' + json[1][0] + "</p><br><br>";
-					tweetText = json[1][0] + "<br><br>";
+					tweetText = '<div class="tweetText">' + json[1][0] + "</div>";
 					if (sentiment == "positive") {
-						$('#tweets').prepend('<div class="green-triangle"></div>' + tweetText);
+						$('#tweets').prepend('<div><div class="green-triangle"></div>' + tweetText + "</div>");
 						happyTotal += 1;
 					}
 					else if (sentiment == "negative") {
-						$('#tweets').prepend('<div class="red-triangle"></div>' + tweetText);
+						$('#tweets').prepend('<div><div class="red-triangle"></div>' + tweetText + "</div>");
 						sadTotal += 1;
 					}
 					else {
@@ -118,7 +118,7 @@
 						$('#mouth').text("(");
 					}
 					else {
-						$('#tweets').prepend('<div class="black-box"></div>' + tweetText);
+						$('#tweets').prepend('<div><div class="black-box"></div>' + tweetText + "</div>");
 						$('#mouth').text("|");
 					}
 
@@ -135,10 +135,12 @@
 			function pauseControl() {
 				if (paused) {
 					paused = false;
+					$("#pauseButton").text("Pause");
 					update();
 				}
 				else {
 					paused = true;
+					$("#pauseButton").text("Unpause");
 					clearTimeout(timeout);
 				}
 			}
@@ -208,8 +210,8 @@
 		<div id="searchContainer">
 			<div id="inputDescription">Track a different stock quote: </div>
 			<input type="text" id="tickerInput" value="^IXIC"></input>
-			<div id="submitButton" onclick="changeTicker();">Submit</div>
-			<div id="submitButton" onclick="pauseControl();">Pause</div>
+			<div id="submitButton" class="button" onclick="changeTicker();">Submit</div>
+			<div id="pauseButton" class="button" onclick="pauseControl();">Pause</div>
 		</div>
 
 		

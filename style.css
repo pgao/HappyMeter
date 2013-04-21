@@ -117,8 +117,8 @@ body {
 
 .tweetText {
 	float: left;
-	width: 500px;
-	height: 300px;
+	width: 410px;
+	margin-bottom: 30px;
 }
 
 #inputDescription {
@@ -131,7 +131,7 @@ body {
 	margin-right: 15px;
 }
 
-#submitButton {
+.button {
 	float: left;
 
 	border-style: solid;
@@ -143,6 +143,10 @@ body {
 
 	cursor: hand;
 	cursor: pointer;
+}
+
+#submitButton {
+	margin-right: 5px;
 }
 
 #searchContainer {
