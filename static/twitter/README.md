@@ -6,7 +6,7 @@ Author: The Python-Twitter Developers <python-twitter@googlegroups.com>
 
 ## Introduction
 
-This library provides a pure Python interface for the [Twitter API](https://dev.twitter.com/).
+This library provides a pure Python interface for the [Twitter API](https://dev.twitter.com/). It works with Python versions from 2.5 to 2.7. Python 3 support is under development.
 
 [Twitter](http://twitter.com) provides a service that allows people to connect via the web, IM, and SMS. Twitter exposes a [web services API](http://dev.twitter.com/doc) and this library is intended to make it even easier for Python programmers to use.
 
@@ -68,7 +68,7 @@ The library provides a Python wrapper around the Twitter API and the Twitter dat
 
 **Model:**
 
-The three model classes are twitter.Status, twitter.User, and `twitter.DirectMessage`. The API methods return instances of these classes.
+The three model classes are `twitter.Status`, `twitter.User`, and `twitter.DirectMessage`. The API methods return instances of these classes.
 
 To read the full API for `twitter.Status`, `twitter.User`, or `twitter.DirectMessage`, run:
 
@@ -108,14 +108,6 @@ To see if your credentials are successful:
 ```
 
 **NOTE -** much more than the small sample given here will print
-
-To fetch the most recently posted public Twitter status messages:
-
-```
->>> statuses = api.GetPublicTimeline()
->>> print [s.user.name for s in statuses]
-[u'DeWitt', u'Kesuke Miyagi', u'ev', u'Buzz Andersen', u'Biz Stone']
-```
 
 To fetch a single user's public status messages, where `user` is either
 a Twitter *short name* or their user id.
@@ -164,12 +156,48 @@ Please visit [the google group](http://groups.google.com/group/python-twitter) f
 
 ## Contributors
 
-Additional thanks to Pierre-Jean Coudert, Omar Kilani, Jodok Batlogg, edleaf, glen.tregoning, Brad Choate, Jim Cortez, Jason Lemoine, Thomas Dyson, Robert Laquey, Hameedullah Khan, Mike Taylor, DeWitt Clinton, and the rest of the python-twitter mailing list.
+Originally two libraries by DeWitt Clinton and Mike Taylor which was then merged into python-twitter.
+
+Now it's a full-on open source project with many contributors over time:
+
+* Jodok Batlogg,
+* Kyle Bock,
+* Brad Choate,
+* Robert Clarke,
+* Jim Cortez,
+* Pierre-Jean Coudert,
+* Aish Raj Dahal,
+* Thomas Dyson,
+* Jim Easterbrook
+* Yoshinori Fukushima,
+* Hameedullah Khan,
+* Osama Khalid,
+* Omar Kilani,
+* Domen Kožar,
+* Robert Laquey,
+* Jason Lemoine,
+* Pradeep Nayak,
+* Ian Ozsvald,
+* Nicolas Perriault,
+* Glen Tregoning,
+* Lars Weiler,
+* Sebastian Wiesinger,
+* abloch,
+* cahlan,
+* dpslwk,
+* edleaf,
+* ecesena,
+* git-matrix,
+* sbywater,
+* thefinn93,
+* themylogin,
+
+and the rest of the python-twitter mailing list.
 
 ## License
 
 ```
-Copyright 2007 The Python-Twitter Developers
+Copyright 2007-2013 The Python-Twitter Developers
 
 Licensed under the Apache License, Version 2.0 (the 'License');
 you may not use this file except in compliance with the License.

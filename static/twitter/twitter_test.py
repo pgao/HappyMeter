@@ -1,5 +1,6 @@
-#!/usr/bin/python2.4
+#!/usr/bin/env python
 # -*- coding: utf-8 -*-#
+# vim: sw=2 ts=2 sts=2
 #
 # Copyright 2007 The Python-Twitter Developers
 #
@@ -356,14 +357,14 @@ class ApiTest(unittest.TestCase):
     api = twitter.Api(consumer_key='CONSUMER_KEY',
                       consumer_secret='CONSUMER_SECRET',
                       access_token_key='OAUTH_TOKEN',
-                      access_token_secret='OAUTH_SECRET', 
+                      access_token_secret='OAUTH_SECRET',
                       cache=None)
     api.SetUrllib(self._urllib)
     self._api = api
 
   def testTwitterError(self):
     '''Test that twitter responses containing an error message are wrapped.'''
-    self._AddHandler('https://api.twitter.com/1/statuses/user_timeline.json',
+    self._AddHandler('https://api.twitter.com/1.1/statuses/user_timeline.json',
                      curry(self._OpenTestData, 'public_timeline_error.json'))
     # Manually try/catch so we can check the exception's value
     try:
@@ -376,25 +377,25 @@ class ApiTest(unittest.TestCase):
 
   def testGetUserTimeline(self):
     '''Test the twitter.Api GetUserTimeline method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/user_timeline/kesuke.json?count=1',
+    self._AddHandler('https://api.twitter.com/1.1/statuses/user_timeline.json?count=1&screen_name=kesuke',
                      curry(self._OpenTestData, 'user_timeline-kesuke.json'))
-    statuses = self._api.GetUserTimeline('kesuke', count=1)
+    statuses = self._api.GetUserTimeline(screen_name='kesuke', count=1)
     # This is rather arbitrary, but spot checking is better than nothing
     self.assertEqual(89512102, statuses[0].id)
     self.assertEqual(718443, statuses[0].user.id)
 
-  def testGetFriendsTimeline(self):
-    '''Test the twitter.Api GetFriendsTimeline method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/friends_timeline/kesuke.json',
-                     curry(self._OpenTestData, 'friends_timeline-kesuke.json'))
-    statuses = self._api.GetFriendsTimeline('kesuke')
-    # This is rather arbitrary, but spot checking is better than nothing
-    self.assertEqual(20, len(statuses))
-    self.assertEqual(718443, statuses[0].user.id)
+  #def testGetFriendsTimeline(self):
+  #  '''Test the twitter.Api GetFriendsTimeline method'''
+  #  self._AddHandler('https://api.twitter.com/1.1/statuses/friends_timeline/kesuke.json',
+  #                   curry(self._OpenTestData, 'friends_timeline-kesuke.json'))
+  #  statuses = self._api.GetFriendsTimeline('kesuke')
+  #  # This is rather arbitrary, but spot checking is better than nothing
+  #  self.assertEqual(20, len(statuses))
+  #  self.assertEqual(718443, statuses[0].user.id)
 
   def testGetStatus(self):
     '''Test the twitter.Api GetStatus method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/show/89512102.json',
+    self._AddHandler('https://api.twitter.com/1.1/statuses/show.json?include_my_retweet=1&id=89512102',
                      curry(self._OpenTestData, 'show-89512102.json'))
     status = self._api.GetStatus(89512102)
     self.assertEqual(89512102, status.id)
@@ -402,36 +403,54 @@ class ApiTest(unittest.TestCase):
 
   def testDestroyStatus(self):
     '''Test the twitter.Api DestroyStatus method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/destroy/103208352.json',
+    self._AddHandler('https://api.twitter.com/1.1/statuses/destroy/103208352.json',
                      curry(self._OpenTestData, 'status-destroy.json'))
     status = self._api.DestroyStatus(103208352)
     self.assertEqual(103208352, status.id)
 
   def testPostUpdate(self):
     '''Test the twitter.Api PostUpdate method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/update.json',
+    self._AddHandler('https://api.twitter.com/1.1/statuses/update.json',
                      curry(self._OpenTestData, 'update.json'))
     status = self._api.PostUpdate(u'Моё судно на воздушной подушке полно угрей'.encode('utf8'))
     # This is rather arbitrary, but spot checking is better than nothing
     self.assertEqual(u'Моё судно на воздушной подушке полно угрей', status.text)
 
+  def testPostRetweet(self):
+    '''Test the twitter.Api PostRetweet method'''
+    self._AddHandler('https://api.twitter.com/1.1/statuses/retweet/89512102.json',
+                     curry(self._OpenTestData, 'retweet.json'))
+    status = self._api.PostRetweet(89512102)
+    self.assertEqual(89512102, status.id)
+
+  def testPostUpdateLatLon(self):
+    '''Test the twitter.Api PostUpdate method, when used in conjunction with latitude and longitude'''
+    self._AddHandler('https://api.twitter.com/1.1/statuses/update.json',
+                     curry(self._OpenTestData, 'update_latlong.json'))
+    #test another update with geo parameters, again test somewhat arbitrary
+    status = self._api.PostUpdate(u'Моё судно на воздушной подушке полно угрей'.encode('utf8'), latitude=54.2, longitude=-2)
+    self.assertEqual(u'Моё судно на воздушной подушке полно угрей', status.text)
+    self.assertEqual(u'Point',status.GetGeo()['type'])
+    self.assertEqual(26.2,status.GetGeo()['coordinates'][0])
+    self.assertEqual(127.5,status.GetGeo()['coordinates'][1])
+
   def testGetReplies(self):
     '''Test the twitter.Api GetReplies method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/replies.json?page=1',
+    self._AddHandler('https://api.twitter.com/1.1/statuses/user_timeline.json',
                      curry(self._OpenTestData, 'replies.json'))
-    statuses = self._api.GetReplies(page=1)
+    statuses = self._api.GetReplies()
     self.assertEqual(36657062, statuses[0].id)
 
   def testGetRetweetsOfMe(self):
     '''Test the twitter.API GetRetweetsOfMe method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/retweets_of_me.json',
+    self._AddHandler('https://api.twitter.com/1.1/statuses/retweets_of_me.json',
         curry(self._OpenTestData, 'retweets_of_me.json'))
     retweets = self._api.GetRetweetsOfMe()
     self.assertEqual(253650670274637824, retweets[0].id)
 
   def testGetFriends(self):
     '''Test the twitter.Api GetFriends method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/friends.json?cursor=123',
+    self._AddHandler('https://api.twitter.com/1.1/friends/list.json?cursor=123',
                      curry(self._OpenTestData, 'friends.json'))
     users = self._api.GetFriends(cursor=123)
     buzz = [u.status for u in users if u.screen_name == 'buzz']
@@ -439,32 +458,32 @@ class ApiTest(unittest.TestCase):
 
   def testGetFollowers(self):
     '''Test the twitter.Api GetFollowers method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/followers.json?cursor=-1',
+    self._AddHandler('https://api.twitter.com/1.1/followers/list.json?cursor=-1',
                      curry(self._OpenTestData, 'followers.json'))
     users = self._api.GetFollowers()
     # This is rather arbitrary, but spot checking is better than nothing
     alexkingorg = [u.status for u in users if u.screen_name == 'alexkingorg']
     self.assertEqual(89554432, alexkingorg[0].id)
 
-  def testGetFeatured(self):
-    '''Test the twitter.Api GetFeatured method'''
-    self._AddHandler('https://api.twitter.com/1/statuses/featured.json',
-                     curry(self._OpenTestData, 'featured.json'))
-    users = self._api.GetFeatured()
-    # This is rather arbitrary, but spot checking is better than nothing
-    stevenwright = [u.status for u in users if u.screen_name == 'stevenwright']
-    self.assertEqual(86991742, stevenwright[0].id)
+  #def testGetFeatured(self):
+  #  '''Test the twitter.Api GetFeatured method'''
+  #  self._AddHandler('https://api.twitter.com/1.1/statuses/featured.json',
+  #                   curry(self._OpenTestData, 'featured.json'))
+  #  users = self._api.GetFeatured()
+  #  # This is rather arbitrary, but spot checking is better than nothing
+  #  stevenwright = [u.status for u in users if u.screen_name == 'stevenwright']
+  #  self.assertEqual(86991742, stevenwright[0].id)
 
   def testGetDirectMessages(self):
     '''Test the twitter.Api GetDirectMessages method'''
-    self._AddHandler('https://api.twitter.com/1/direct_messages.json?page=1',
+    self._AddHandler('https://api.twitter.com/1.1/direct_messages.json',
                      curry(self._OpenTestData, 'direct_messages.json'))
-    statuses = self._api.GetDirectMessages(page=1)
+    statuses = self._api.GetDirectMessages()
     self.assertEqual(u'A légpárnás hajóm tele van angolnákkal.', statuses[0].text)
 
   def testPostDirectMessage(self):
     '''Test the twitter.Api PostDirectMessage method'''
-    self._AddHandler('https://api.twitter.com/1/direct_messages/new.json',
+    self._AddHandler('https://api.twitter.com/1.1/direct_messages/new.json',
                      curry(self._OpenTestData, 'direct_messages-new.json'))
     status = self._api.PostDirectMessage('test', u'Моё судно на воздушной подушке полно угрей'.encode('utf8'))
     # This is rather arbitrary, but spot checking is better than nothing
@@ -472,7 +491,7 @@ class ApiTest(unittest.TestCase):
 
   def testDestroyDirectMessage(self):
     '''Test the twitter.Api DestroyDirectMessage method'''
-    self._AddHandler('https://api.twitter.com/1/direct_messages/destroy/3496342.json',
+    self._AddHandler('https://api.twitter.com/1.1/direct_messages/destroy.json',
                      curry(self._OpenTestData, 'direct_message-destroy.json'))
     status = self._api.DestroyDirectMessage(3496342)
     # This is rather arbitrary, but spot checking is better than nothing
@@ -480,7 +499,7 @@ class ApiTest(unittest.TestCase):
 
   def testCreateFriendship(self):
     '''Test the twitter.Api CreateFriendship method'''
-    self._AddHandler('https://api.twitter.com/1/friendships/create/dewitt.json',
+    self._AddHandler('https://api.twitter.com/1.1/friendships/create.json',
                      curry(self._OpenTestData, 'friendship-create.json'))
     user = self._api.CreateFriendship('dewitt')
     # This is rather arbitrary, but spot checking is better than nothing
@@ -488,7 +507,7 @@ class ApiTest(unittest.TestCase):
 
   def testDestroyFriendship(self):
     '''Test the twitter.Api DestroyFriendship method'''
-    self._AddHandler('https://api.twitter.com/1/friendships/destroy/dewitt.json',
+    self._AddHandler('https://api.twitter.com/1.1/friendships/destroy.json',
                      curry(self._OpenTestData, 'friendship-destroy.json'))
     user = self._api.DestroyFriendship('dewitt')
     # This is rather arbitrary, but spot checking is better than nothing
@@ -496,7 +515,7 @@ class ApiTest(unittest.TestCase):
 
   def testGetUser(self):
     '''Test the twitter.Api GetUser method'''
-    self._AddHandler('https://api.twitter.com/1/users/show/dewitt.json',
+    self._AddHandler('https://api.twitter.com/1.1/users/show.json?user_id=dewitt',
                      curry(self._OpenTestData, 'show-dewitt.json'))
     user = self._api.GetUser('dewitt')
     self.assertEqual('dewitt', user.screen_name)
@@ -534,9 +553,12 @@ class MockUrllib(object):
 
   def HTTPSHandler(self, *args, **kwargs):
       return None
-  
+
   def OpenerDirector(self):
       return self.build_opener()
+
+  def ProxyHandler(self,*args,**kwargs):
+      return None
 
 class MockOpener(object):
   '''A mock opener for urllib'''
@@ -548,24 +570,27 @@ class MockOpener(object):
   def open(self, url, data=None):
     if self._opened:
       raise Exception('MockOpener already opened.')
-  
+
     # Remove parameters from URL - they're only added by oauth and we
-    # don't want to test oauth 
+    # don't want to test oauth
     if '?' in url:
         # We split using & and filter on the beginning of each key
         # This is crude but we have to keep the ordering for now
         (url, qs) = url.split('?')
-        
-        tokens = [token for token in qs.split('&') 
+
+        tokens = [token for token in qs.split('&')
                   if not token.startswith('oauth')]
-        
+
         if len(tokens) > 0:
             url = "%s?%s"%(url, '&'.join(tokens))
-  
+
     if url in self._handlers:
       self._opened = True
       return self._handlers[url]()
     else:
+      print url
+      print self._handlers
+
       raise Exception('Unexpected URL %s (Checked: %s)' % (url, self._handlers))
 
   def add_handler(self, *args, **kwargs):
