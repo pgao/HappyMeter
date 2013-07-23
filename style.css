@@ -1,5 +1,4 @@
 body {
-	/*background-color: #F2F2F2;*/
 	background-color: white;
 }
 
@@ -107,8 +106,10 @@ body {
 }
 
 .tweetText {
+	text-align: left;
 	float: left;
 	width: 410px;
+	margin-left: 5px;
 	margin-bottom: 30px;
 }
 
