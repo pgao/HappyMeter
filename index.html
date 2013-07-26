@@ -1,220 +1,234 @@
 <html>
-	
-	<head>
-		<script language="javascript" type="text/javascript" src="/static/flot/jquery.js"></script>
-		<script language="javascript" type="text/javascript" src="/static/flot/jquery.flot.js"></script>
-		<script language="javascript" type="text/javascript" src="/static/reveal/jquery.reveal.js"></script>
-		<link href="style.css" rel="stylesheet" type="text/css">
-		<link href="/static/reveal/reveal.css" rel="stylesheet">
-		<link href='http://fonts.googleapis.com/css?family=EB+Garamond' rel='stylesheet' type='text/css'>
-		<link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
+    
+    <head>
+        <script language="javascript" type="text/javascript" src="/static/flot/jquery.js"></script>
+        <script language="javascript" type="text/javascript" src="/static/flot/jquery.flot.js"></script>
+        <script language="javascript" type="text/javascript" src="/static/reveal/jquery.reveal.js"></script>
+        <link href="style.css" rel="stylesheet" type="text/css">
+        <link href="/static/reveal/reveal.css" rel="stylesheet">
+        <link href='http://fonts.googleapis.com/css?family=EB+Garamond' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Oxygen' rel='stylesheet' type='text/css'>
 
-		<title>HAPPYMETER</title>
-	</head>
-	
-	<body>
+        <title>HAPPYMETER</title>
+    </head>
+    
+    <body>
 
-		<script type="text/javascript">
-			var timeout;
-			var paused = false;
+        <script type="text/javascript">
+            var timeout;
+            var paused = false;
 
-			var data = [];
-			var updateInterval = 1000;
-			var width = 100;
-			var tweetslength = 0;
+            var data = [];
+            var updateInterval = 1300;
+            var width = 100;
+            var tweetslength = 0;
 
-			var score = 5000;
+            var score = 5000;
 
-			happyTotal = 1;
-			sadTotal = 1;
-			neutralTotal = 1
+            happyTotal = 1;
+            sadTotal = 1;
+            neutralTotal = 1
 
-			var first = true;
+            var first = true;
 
-			var options = {
-				series: { shadowSize: 0 }, // drawing is faster without shadows
-		        yaxis: { min: 0, max: 35000, labelWidth: 50},
-		        xaxis: { show: false }
-			}
+            var options = {
+                series: { shadowSize: 0 }, // drawing is faster without shadows
+                yaxis: { min: 0, max: 35000, labelWidth: 50},
+                xaxis: { show: false }
+            }
 
-			var url = "getData";
+            var url = "getData";
 
-			function changeTicker() {
-				data = [];
-				while (data.length < width)
-					data.push(0);
-				happyTotal = 1;
-				sadTotal = 1;
-				neutralTotal = 1;
-				$.plot("#plot", data, options);
-				$('#tweets').text('');
-				var newTick = $("#tickerInput").val();
-				url = "getData?name=" + newTick;
-			}
+            function replaceURLWithHTMLLinks(text) {
+                var exp = /(\b(https?|ftp|file):\/\/[-A-Z0-9+&@#\/%?=~_|!:,.;]*[-A-Z0-9+&@#\/%=~_|])/ig;
+                return text.replace(exp,"<a href='$1' target='_blank'>$1</a>"); 
+            }
 
-			function getData() {
-				if (data.length > 0)
-					data = data.slice(1);
-
-				$.getJSON(url, function(json) {
-					//stock plot
-					var name = json[0][1];
-					var tweet = json[1][0];
-					var sentiment = json[1][1];
-					var total = parseInt(json[0][0]);
-
-					$('#plotTitle').text("Plot of stock price for: " + name);
-
-					while (data.length < width) {
-						data.push(total);
-					}
-
-					var res = [];
-					for (var i = 0; i < data.length; ++i)
-        				res.push([i, data[i]]);
-
-        			if (first == true || total > options["yaxis"]["max"] || total < options["yaxis"]["min"]) {
-        				first = false;
-        				options["yaxis"]["min"] = total * 0.99;
-        				options["yaxis"]["max"] = total * 1.01;
-        			}
-
-        			var previous = total;
-
-        			if (data[data.length - 2] != 50) {
-        				var previous = data[data.length - 2];
-        			}
+            function changeTicker() {
+                data = [];
+                while (data.length < width)
+                    data.push(0);
+                happyTotal = 1;
+                sadTotal = 1;
+                neutralTotal = 1;
+                $.plot("#plot", data, options);
+                $('#tweets').text('');
+                var newTick = $("#tickerInput").val();
+                url = "getData?name=" + newTick;
+            }
 
 
-					$.plot("#plot", [res], options);
+            function getData() {
+                if (data.length > 0)
+                    data = data.slice(1);
 
-					//reset tweetbox
-					tweetslength++;
-					if(tweetslength > 100) {
-						$('#tweets').text("");
-						tweetslength = 0;
-					}
+                $.getJSON(url, function(json) {
+                    //stock plot
+                    var name = json[0][1];
+                    var tweet = json[1][0];
+                    var sentiment = json[1][1];
+                    var total = parseInt(json[0][0]);
 
-					//change happy face
-					var tweetScore = 1000;
-					//tweetText = '<p class="tweetText">' + json[1][0] + "</p><br><br>";
-					tweetText = '<div class="tweetText">' + json[1][0] + "</div>";
-					if (sentiment == "positive") {
-						$('#tweets').prepend('<div><div class="green-triangle"></div>' + tweetText + "</div>");
-						happyTotal += 1;
-					}
-					else if (sentiment == "negative") {
-						$('#tweets').prepend('<div><div class="red-triangle"></div>' + tweetText + "</div>");
-						sadTotal += 1;
-					}
-					else {
-						neutralTotal = 1;
-					}
+                    $('#plotTitle').text("Plot of stock price for: " + name);
 
-					if (happyTotal/(happyTotal + sadTotal + neutralTotal) > 0.4) {
-						$('#mouth').text(")");
-					}
-					else if (sadTotal/(happyTotal + sadTotal + neutralTotal) > 0.4) {
-						$('#mouth').text("(");
-					}
-					else {
-						$('#tweets').prepend('<div><div class="black-box"></div>' + tweetText + "</div>");
-						$('#mouth').text("|");
-					}
+                    while (data.length < width) {
+                        data.push(total);
+                    }
 
-				});
+                    var res = [];
+                    for (var i = 0; i < data.length; ++i)
+                        res.push([i, data[i]]);
 
-			}
-			
-			function update() {
-				getData();
+                    if (first == true || total > options["yaxis"]["max"] || total < options["yaxis"]["min"]) {
+                        first = false;
+                        options["yaxis"]["min"] = total * 0.99;
+                        options["yaxis"]["max"] = total * 1.01;
+                    }
 
-				timeout = setTimeout(update, updateInterval);
-			}
+                    var previous = total;
 
-			function pauseControl() {
-				if (paused) {
-					paused = false;
-					$("#pauseButton").text("Pause");
-					update();
-				}
-				else {
-					paused = true;
-					$("#pauseButton").text("Unpause");
-					clearTimeout(timeout);
-				}
-			}
+                    if (data[data.length - 2] != 50) {
+                        var previous = data[data.length - 2];
+                    }
 
-			$(function() {				
 
-				$("#tickerInput").bind("keypress", {}, keypressInBox);
+                    $.plot("#plot", [res], options);
 
-				function keypressInBox(e) {
-				    var code = (e.keyCode ? e.keyCode : e.which);
-				    if (code == 13) { //Enter keycode                        
-				        e.preventDefault();
-				        changeTicker();
-				    }
-				};
+                    //reset tweetbox
+                    tweetslength++;
+                    if(tweetslength > 100) {
+                        $('#tweets').text("");
+                        tweetslength = 0;
+                    }
 
-				//var plot = $.plot($("#plot"), [ 50 ], options);
-				$.plot("#plot", data, options);
+                    //change happy face
+                    var tweetScore = 1000;
+                    var tweetText = replaceURLWithHTMLLinks('<div class="tweetText">' + json[1][0] + "</div>");
+                    if (sentiment == "positive") {
+                        tweetText = '<div><div class="green-triangle"></div>' + tweetText + "</div>";
+                        happyTotal += 1;
+                    }
+                    else if (sentiment == "negative") {
+                        tweetText = '<div><div class="red-triangle"></div>' + tweetText + "</div>";
+                        sadTotal += 1;
+                    }
+                    else {
+                        tweetText = '<div><div class="black-box"></div>' + tweetText + "</div>"
+                        neutralTotal += 1;
+                    }
 
-				while (data.length < width)
-					data.push(0);
+                    var new_content = $(tweetText).css('opacity', '0').prependTo('#tweets').css('display', 'none');
+                    var new_content_height = new_content.height();
+                    new_content.height('0px');
+                    new_content.css('display','');
+                    new_content.animate({height: new_content_height + 'px', opacity: 1}, 1000);
 
-				update();
+                    // $('#tweets').prepend(tweetText);
+                    
 
-			});
-			
-			
-		</script>
+                    if (happyTotal/(happyTotal + sadTotal + neutralTotal) > 0.4) {
+                        $('#mouth').text(")");
+                    }
+                    else if (sadTotal/(happyTotal + sadTotal + neutralTotal) > 0.4) {
+                        $('#mouth').text("(");
+                    }
+                    else {
+                        $('#mouth').text("|");
+                    }
 
-		<div id="title">Happy Meter</div>
+                });
 
-		<div id="instructionModal" class="reveal-modal">
-			<h1>This is what.</h1>
-			<p>What is happiness?  According to Sri, it is a bank account stuffed with cash and the fervent adulation of your peers.  To that end, I made this tool to tell you how happy, sad, or meh you should be feeling at any given time.</p>
-			<p>The left graph plots the price of a stock of your choice.  The right graph tells you how happy Twitter is feeling regarding the company of that stock.  The face-shaped box at the top of the page provides a helpful graphical illustration of your current state of bliss/panic.</p>
-			<p>Enjoy!  Or don't.</p>
-			<a class="close-reveal-modal">&#215;</a>
-		</div>
-		<br>
-		<div id="instructionContainer">
-			<a href="#" id="instructions" data-reveal-id="instructionModal">What is this?</a>
-		</div>
+            }
+            
+            function update() {
+                getData();
 
-		<br>
-		<br>
+                timeout = setTimeout(update, updateInterval);
+            }
 
-		<div id="happyface">
-			<div id="eyes">:</div>
-			<div id="mouth">|</div>
-		</div>
+            function pauseControl() {
+                if (paused) {
+                    paused = false;
+                    $("#pauseButton").text("Pause");
+                    update();
+                }
+                else {
+                    paused = true;
+                    $("#pauseButton").text("Unpause");
+                    clearTimeout(timeout);
+                }
+            }
 
-		<br>
-		<br>
+            $(function() {              
 
-		<div id="mainContainer">
-			<div id="plotTitle"></div>
-			<br>
-			<div id="plotContainer">
-				<div id="plot"></div>
-			</div>
-			<div id="tweets"></div>
-		</div>
+                $("#tickerInput").bind("keypress", {}, keypressInBox);
 
-		<br>
-		<br>
-		
-		<div id="searchContainer">
-			<div id="inputDescription">Track a different stock quote: </div>
-			<input type="text" id="tickerInput" value="^IXIC"></input>
-			<div id="submitButton" class="button" onclick="changeTicker();">Update</div>
-			<div id="pauseButton" class="button" onclick="pauseControl();">Pause</div>
-		</div>
+                function keypressInBox(e) {
+                    var code = (e.keyCode ? e.keyCode : e.which);
+                    if (code == 13) { //Enter keycode                        
+                        e.preventDefault();
+                        changeTicker();
+                    }
+                };
 
-		
-	</body>
-	
+                //var plot = $.plot($("#plot"), [ 50 ], options);
+                $.plot("#plot", data, options);
+
+                while (data.length < width)
+                    data.push(0);
+
+                update();
+
+            });
+            
+            
+        </script>
+
+        <div id="title">Happy Meter</div>
+
+        <div id="instructionModal" class="reveal-modal">
+            <h1>This is what.</h1>
+            <p>What is happiness?  According to Sri, it is a bank account stuffed with cash and the fervent adulation of your peers.  To that end, I made this tool to tell you how happy, sad, or meh you should be feeling at any given time.</p>
+            <p>The left graph plots the price of a stock of your choice.  The right graph tells you how happy Twitter is feeling regarding the company of that stock.  The face-shaped box at the top of the page provides a helpful graphical illustration of your current state of bliss/panic.</p>
+            <p>Enjoy!  Or don't.</p>
+            <a class="close-reveal-modal">&#215;</a>
+        </div>
+        <br>
+        <div id="instructionContainer">
+            <a href="#" id="instructions" data-reveal-id="instructionModal">What is this?</a>
+        </div>
+
+        <br>
+        <br>
+
+        <div id="happyface">
+            <div id="eyes">:</div>
+            <div id="mouth">|</div>
+        </div>
+
+        <br>
+        <br>
+
+        <div id="mainContainer">
+            <div id="plotTitle"></div>
+            <br>
+            <div id="plotContainer">
+                <div id="plot"></div>
+            </div>
+            <div id="tweets"></div>
+        </div>
+
+        <br>
+        <br>
+        
+        <div id="searchContainer">
+            <div id="inputDescription">Track a different stock quote: </div>
+            <input type="text" id="tickerInput" value="^IXIC"></input>
+            <div id="submitButton" class="button" onclick="changeTicker();">Update</div>
+            <div id="pauseButton" class="button" onclick="pauseControl();">Pause</div>
+        </div>
+
+        
+    </body>
+    
 </html>
